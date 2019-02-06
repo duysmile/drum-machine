@@ -1,32 +1,36 @@
-.App {
-  text-align: center;
+body, #root {
+  width: 100vw;
+  height: 100vh;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
+button {
+  width: 80px !important;
+  height: 80px !important;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.touch-btn {
+  width: 40px;
+  height: 20px;
+  margin-bottom: 7px;
+  border: 2px solid black;
+  background-color: #ccc;
+  position: relative;
 }
 
-.App-link {
-  color: #61dafb;
+.touch-btn-item {
+  width: 18px;
+  height: 16px;
+  cursor: pointer;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.touch-btn-on {
+  background-color: cyan;
+  float: right;
 }
+
+.touch-btn-off {
+  background-color: red;
+  float: left;
+}
+
+
