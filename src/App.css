@@ -33,4 +33,24 @@ button {
   float: left;
 }
 
+.btn-keyboard {
+  border-radius: 10px;
+  border: 2px solid cyan;
+  background-color: white;
+}
 
+.btn-keyboard:hover {
+  background-color: white;
+}
+
+.btn-keyboard:focus {
+  outline: none;
+}
+
+.btn-selected {
+  background-color: yellow !important;
+}
+
+.desc--height {
+  min-height: 40px;
+}

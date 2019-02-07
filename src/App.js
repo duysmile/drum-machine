@@ -100,25 +100,57 @@ const bankTwo = [{
 class BtnKey extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      isSelected: false
+    };
+
     this.handleClickKey = this.handleClickKey.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.playAudio = this.playAudio.bind(this);
   }
 
   handleClickKey(event) {
-    this.props.handleClickKey(this.props.key);
+    this.playAudio(this.props.keyInfo.keyTrigger);
   }
 
   componentDidMount() {
-    document.addEventListener('keypress', function (event) {
+    document.addEventListener('keydown', this.handleKeyPress)
+  }
 
-    })
+  handleKeyPress(event) {
+    if (event.keyCode === this.props.keyInfo.keyCode) {
+      this.playAudio(this.props.keyInfo.keyTrigger);
+    }
+  }
+
+  playAudio(keyTrigger) {
+    this.setState({
+      isSelected: true
+    });
+    this.props.changeDescription(this.props.keyInfo.id);
+    const audio = document.getElementById(keyTrigger);
+    audio.currentTime = 0;
+    audio.play();
+    setTimeout(() => {
+      this.setState({
+        isSelected: false
+      });
+    }, 200);
   }
 
   render() {
+    let classes = ['btn-keyboard'];
+    if (this.state.isSelected) {
+      classes = classes.concat('btn-selected');
+    }
+    classes = classes.join(' ');
     return (
       <div className="mx-2">
-        <button className="form-control bg-light" onClick={this.handleClickKey}>
-          {this.props.keyTitle}
+        <button className={classes} onClick={this.handleClickKey}>
+          {this.props.keyInfo.keyTrigger}
         </button>
+        <audio id={this.props.keyInfo.keyTrigger} src={this.props.keyInfo.url}></audio>
       </div>
     );
   }
@@ -126,22 +158,35 @@ class BtnKey extends React.Component {
 
 class KeyBoard extends React.Component {
   render() {
+    let keyInfo = [...this.props.keyInfo];
+    if (!this.props.power) {
+      keyInfo = keyInfo.map(function (item) {
+        item.url = '#';
+        return item;
+      });
+    }
     return (
       <div className="d-flex flex-column">
         <div className="d-flex m-2">
-          <BtnKey keyTitle="Q" />
-          <BtnKey keyTitle="W" />
-          <BtnKey keyTitle="E" />
+          {keyInfo.slice(0, 3).map((item, index) => {
+            return (
+              <BtnKey changeDescription={this.props.changeDescription} key={index} keyInfo={item} />
+            )
+          })}
         </div>
         <div className="d-flex m-2">
-          <BtnKey keyTitle="A" />
-          <BtnKey keyTitle="S" />
-          <BtnKey keyTitle="D" />
+          {this.props.keyInfo.slice(3, 6).map((item, index) => {
+            return (
+              <BtnKey changeDescription={this.props.changeDescription} key={index} keyInfo={item} />
+            )
+          })}
         </div>
         <div className="d-flex m-2">
-          <BtnKey keyTitle="Z" />
-          <BtnKey keyTitle="X" />
-          <BtnKey keyTitle="C" />
+          {this.props.keyInfo.slice(6, 9).map((item, index) => {
+            return (
+              <BtnKey changeDescription={this.props.changeDescription} key={index} keyInfo={item} />
+            )
+          })}
         </div>
       </div>
     );
@@ -162,12 +207,22 @@ class App extends React.Component {
     super(props);
     this.state = {
       power: true,
-      description: '',
+      description: ' ',
       bank: false,
+      volume: 0
     };
 
     this.changePower = this.changePower.bind(this);
     this.changeBank = this.changeBank.bind(this);
+    this.changeVolume = this.changeVolume.bind(this);
+    this.changeDescription = this.changeDescription.bind(this);
+  }
+
+  componentDidMount() {
+    const elements = document.getElementsByTagName('audio')
+    for (let i = 0; i < elements.length; i++) {
+      elements[i].volume = 0;
+    }
   }
 
   changePower() {
@@ -181,27 +236,50 @@ class App extends React.Component {
   changeBank() {
     this.setState((prev) => {
       return {
+        description: '',
         bank: !prev.bank
       };
     });
+  }
+
+  changeDescription(text) {
+    this.setState({
+      description: text
+    });
+  }
+
+  changeVolume(event) {
+    this.setState({
+      volume: event.target.value,
+      description: 'Volume: ' + event.target.value
+    });
+    const elements = document.getElementsByTagName('audio')
+    for (let i = 0; i < elements.length; i++) {
+      elements[i].volume = event.target.value / 100;
+    }
+    setTimeout(() => {
+      this.setState({
+        description: ''
+      })
+    }, 800);
   }
 
   render() {
     return (
       <div className="d-flex justify-content-center align-items-center h-100">
         <div className="border d-flex p-3">
-          <KeyBoard />
+          <KeyBoard power={this.state.power} changeDescription={this.changeDescription} keyInfo={this.state.bank ? bankOne : bankTwo} />
           <div className="m-2 p-2 px-4 border d-flex flex-column justify-content-between">
             <div>
               Power
               <TouchBtn checkOn={this.state.power} onClick={this.changePower} />
             </div>
-            <div className="bg-secondary p-2 text-white font-weight-bold text-center">
-              Description
+            <div className="desc--height bg-secondary p-2 text-white font-weight-bold text-center">
+              {this.state.description}
             </div>
             <div className="d-flex flex-column">
               <span>Volume</span>
-              <input type="range" />
+              <input type="range" onChange={this.changeVolume} value={this.state.volume} />
             </div>
             <div>
               Bank
